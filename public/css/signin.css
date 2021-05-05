@@ -37,3 +37,11 @@ body {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+.sp{
+  color: blueviolet;
+}
+.sp:hover{
+  color: rgb(159, 82, 169);
+  text-decoration: underline ;
+}

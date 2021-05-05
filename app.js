@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}))
@@ -9,10 +10,21 @@ app.use(express.static("public"));
 app.set('view engine', 'ejs');
 var item = ['buji', 'pallan'];
 
+//database connection
+const password = 'kysveP-durdyt-2nafty'
+mongoose.connect("mongodb+srv://ananthugiridhar:kysveP-durdyt-2nafty@todolist.wb7ss.mongodb.net/todolistDB", 
+    {newUrlParser: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,    })
+const usersSchema = {
+    username : String,
+    email : String,
+    password : String,
+}
+const User = mongoose.model('User', usersSchema)
+
 
 app.get('/', (req, res) => {
-    
-
     res.render("login")
 })
 
@@ -46,9 +58,34 @@ app.post('/lists', (req, res) => {
     }
 })
 
-app.post('/register', (req, res) =>{
-    res.render('register')
+
+app.get('/register', (req, res) => {
+    res.render("register");
 })
+
+app.post('/register', (req, res) =>{
+    const user = new User({
+        username : req.body.name,
+        email : req.body.email,
+        password : req.body.password,
+    })
+
+  
+
+    User.insertMany(user, (err) =>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log('success');
+            res.send('added user successfully');
+        }
+    })
+    
+})
+
+
+
+
 
 
 app.listen(3000, ()=> {
