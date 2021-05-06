@@ -8,14 +8,19 @@ app.use(express.static("public"));
 
 
 app.set('view engine', 'ejs');
-var item = ['buji', 'pallan'];
+// var item = ['buji', 'pallan'];
+var today = '';
+var username = '';
 
-//database connection
+
+
+
+// User database connection
 const password = 'kysveP-durdyt-2nafty'
 mongoose.connect("mongodb+srv://ananthugiridhar:kysveP-durdyt-2nafty@todolist.wb7ss.mongodb.net/todolistDB", 
-    {newUrlParser: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,    })
+    {useNewUrlParser: true, useUnifiedTopology: true, })
+ 
+//user schema
 const usersSchema = {
     username : String,
     email : String,
@@ -23,66 +28,123 @@ const usersSchema = {
 }
 const User = mongoose.model('User', usersSchema)
 
+//items schema
+const itemsShema = {
+    username : String,
+    item : String,
+}
+const Item = mongoose.model('Item', itemsShema);
 
+
+//for login screen
 app.get('/', (req, res) => {
     res.render("login")
 })
 
 
+//for checking user credentials 
 app.post('/', function(req, res)  {
-    console.log(req.body);
-    item.push(req.body.newItem);
-    console.log(item);
-    res.redirect('/');
-})
-
-app.get('/lists', (req, res) => {
     const day = new Date();
     var options = {
         weekday :'long',
         day: 'numeric',
         month : 'long'
     };
+    today = day.toLocaleDateString("en-US", options);
+    
 
-    var today = day.toLocaleDateString("en-US", options);
-    res.render("samle", {day : today, items : item})
+    User.findOne({email : req.body.email, password : req.body.password}, (err, result) =>{  
+        if(result){ 
+            username = result.username;
+            res.redirect('/lists');
+        }else{
+            res.send('invalid username or password');
+        }
+    })
 })
 
-app.post('/lists', (req, res) => { 
-    // console.log(req.body);
-    if(req.body.email === 'ananthu@gmail.com' && req.body.password == 'pallan007'){
-       res.redirect('/lists')
-    }
-    else{
-        res.send('invalid username or password');
-    }
+
+//endpoint for getting list items for a particular user
+app.get('/lists', (req, res) => {
+    var foundItems = [];
+    
+    Item.find({username : username}, (err, result) => {
+        if(err){
+            res.send(err)
+        }else{
+            foundItems = result;
+            res.render("samle", {day: today, items: foundItems, name: username})
+        }
+        
+    })
+    
+
 })
 
 
-app.get('/register', (req, res) => {
-    res.render("register");
-})
-
-app.post('/register', (req, res) =>{
-    const user = new User({
-        username : req.body.name,
-        email : req.body.email,
-        password : req.body.password,
+//endpoint for adding new item for a particular item
+app.post('/lists', (req, res) => {
+    const item = new Item({
+        username : username,
+        item : req.body.newItem,
     })
 
-  
-
-    User.insertMany(user, (err) =>{
+    Item.insertMany(item, (err) => {
         if(err){
-            console.log(err);
+            res.send(err)
         }else{
-            console.log('success');
-            res.send('added user successfully');
+            res.redirect('/lists');
         }
     })
     
 })
 
+
+//endpoint for register form
+app.get('/register', (req, res) => {
+    res.render("register");
+})
+
+
+//adding new user to the UsersList
+app.post('/register', (req, res) =>{
+    const user = new User({
+        username : req.body.name,
+        email : req.body.email,
+        password : req.body.password,
+    }) 
+
+    User.findOne({email : req.body.email}, (err, result) =>{  
+        if(result){ 
+            res.send('Account with this email already exist');
+        }else{
+            User.insertMany(user, (err) =>{
+                if(err){
+                    console.log(err);
+                    res.send(err);
+                }else{
+                    res.redirect('/');
+                }
+            })
+        }
+    })
+    
+
+   
+    
+})
+
+
+app.post('/delete', (req, res) => {
+
+    Item.deleteOne({_id : req.body.id}, (err) => {
+        if(err){
+            res.send(err);
+        }else{
+            res.redirect('/lists');
+        }
+    })
+})
 
 
 
