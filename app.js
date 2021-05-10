@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config({path:__dirname+'/.env'})
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
@@ -14,10 +15,12 @@ var username = '';
 
 
 
-
 // User database connection
-const password = 'kysveP-durdyt-2nafty'
-mongoose.connect("mongodb+srv://ananthugiridhar:kysveP-durdyt-2nafty@todolist.wb7ss.mongodb.net/todolistDB", 
+const db_password = process.env['DB_PASSWORD'].toString();
+const db_username = process.env.DB_USERNAME;
+
+
+mongoose.connect(`mongodb+srv://${db_username}:${db_password}@todolist.wb7ss.mongodb.net/todolistDB`, 
     {useNewUrlParser: true, useUnifiedTopology: true, })
  
 //user schema
