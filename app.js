@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config({path:__dirname+'/.env'})
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const md5 = require('md5');
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}))
@@ -56,7 +57,7 @@ app.post('/', function(req, res)  {
     today = day.toLocaleDateString("en-US", options);
     
 
-    User.findOne({email : req.body.email, password : req.body.password}, (err, result) =>{  
+    User.findOne({email : req.body.email, password : md5(req.body.password)}, (err, result) =>{  
         if(result){ 
             username = result.username;
             res.redirect('/lists');
@@ -114,8 +115,8 @@ app.post('/register', (req, res) =>{
     const user = new User({
         username : req.body.name,
         email : req.body.email,
-        password : req.body.password,
-    }) 
+        password : md5(req.body.password),
+    })  
 
     User.findOne({email : req.body.email}, (err, result) =>{  
         if(result){ 
@@ -153,8 +154,8 @@ app.post('/delete', (req, res) => {
 
 
 
-app.listen(3000, ()=> {
-    console.log('sever runnning on port 3000 successfully');
+app.listen(5000, ()=> {
+    console.log('sever runnning on port 5000 successfully');
 })
 
 
