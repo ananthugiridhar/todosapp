@@ -17,7 +17,7 @@ var username = '';
 
 
 // User database connection
-const db_password = process.env['DB_PASSWORD'].toString();
+const db_password = process.env['DB_PASSWORD'];
 const db_username = process.env.DB_USERNAME;
 
 
